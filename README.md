@@ -5,22 +5,15 @@
 #### Запуск
 docker-compose up --build
 
-#### Сервіси
-- Django
-- PostgreSQL
-- Nginx
-
-##### Опис проєкту
-Цей проєкт демонструє використання:
+##### Проєкт демонструє використання:
 - **Django** — для вебзастосунку
 - **PostgreSQL** — для збереження даних
 - **Nginx** — як вебсервер та проксі
 
-Всі сервіси контейнеризовані за допомогою Docker і керуються через Docker Compose.
-
 
 ##### Структура проєкту
 
+```bash
 django-docker-project/
 │
 ├── docker-compose.yml
@@ -47,73 +40,75 @@ django-docker-project/
         ├── models.py
         ├── tests.py
         └── views.py
-
+```
 
 ###### Процес створення
 
 1. **Ініціалізація Django-проєкту**  
-   - Створено новий проєкт:
-     ```bash
-     django-admin startproject core app
-     ```
-   - Додано базовий додаток:
-     ```bash
-     python manage.py startapp core_app
-     ```
+- Створено новий проєкт:
+```bash
+django-admin startproject core app
+```
+- Додано базовий додаток:
+```bash
+python manage.py startapp core_app
+```
 
-2. **Налаштування PostgreSQL**  
-   - Створено файл `.env` із змінними:
-     ```env
-    DEBUG=
-    SECRET_KEY=
-    POSTGRES_DB=
-    POSTGRES_USER=
-    POSTGRES_PASSWORD=
-    POSTGRES_HOST=
-    POSTGRES_PORT=
-     ```
-   - Підключено PostgreSQL у `settings.py`:
-     ```python
-     DATABASES = {
-         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('POSTGRES_DB'),
-            'USER': os.environ.get('POSTGRES_USER'),
-            'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-            'HOST': os.environ.get('POSTGRES_HOST', 'db'),
-            'PORT': os.environ.get('POSTGRES_PORT', 5432),
-        }
-     }
-     ```
+1. **Налаштування PostgreSQL**  
+- Створено файл `.env` (приклад):
+```bash
+DEBUG=1
+SECRET_KEY=django_secret_key_here
+POSTGRES_DB=django_db
+POSTGRES_USER=django_user
+POSTGRES_PASSWORD=django_pass
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+```
 
-3. **Створення Dockerfile для Django**  
+- Підключено PostgreSQL у `settings.py`:
+  
+```python
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('POSTGRES_DB'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': os.environ.get('POSTGRES_HOST', 'db'),
+        'PORT': os.environ.get('POSTGRES_PORT', 5432),
+    }
+}
+```
+
+1. **Створення Dockerfile для Django**  
    - Використовується `python:3.11-slim`  
    - Встановлення залежностей через `requirements.txt`  
    - Запуск сервера через `gunicorn`
 
-4. **Створення docker-compose.yml**  
+2. **Створення docker-compose.yml**  
    - Описано три сервіси:
      - `db` — PostgreSQL
      - `web` — Django-застосунок
      - `nginx` — проксування запитів на Django
    - Додано volume для збереження даних PostgreSQL
 
-5. **Налаштування Nginx**  
-   - Файл `nginx/nginx.conf`:
-     ```nginx
-     server {
-         listen 80;
+3. **Налаштування Nginx**  
+- Файл `nginx/nginx.conf`:
+    ```bash
+    server {
+        listen 80;
 
-         location / {
-             proxy_pass http://web:8000;
-             proxy_set_header Host $host;
-             proxy_set_header X-Real-IP $remote_addr;
-             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-         }
-     }
-     ```
+        location / {
+            proxy_pass http://web:8000;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+    }
+  ```
 
-6. **Запуск проєкту**  
+1. **Запуск проєкту**  
    ```bash
    docker-compose up --build
    ```
@@ -125,9 +120,9 @@ a99e59b6e57d   django-docker-project-web   "gunicorn core.wsgi:…"   36 minutes
 dbd2a926e261   postgres:15                 "docker-entrypoint.s…"   36 minutes ago   Up 36 minutes   5432/tcp                              postgres_db
 ```
 
-Django доступний на http://localhost через Nginx
-PostgreSQL працює у контейнері db
-Усі сервіси повністю ізольовані і готові до використання
+- Django доступний на http://localhost через Nginx
+- PostgreSQL працює у контейнері db
+- Усі сервіси повністю ізольовані і готові до використання
 
 
 ###### Commands
