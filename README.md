@@ -176,3 +176,11 @@ docker-compose exec web python manage.py shell
 docker-compose down -v
 docker-compose up --build -d
 ```
+
+###### Django + Docker production-ready:
+```bash
+- SECRET_KEY перенесено у os.environ
+- ALLOWED_HOSTS винесено у змінні середовища
+- Додано healthcheck для PostgreSQL у docker-compose
+- Статичні файли Django обслуговуються через Nginx (collectstatic + volume + nginx.conf)
+```
