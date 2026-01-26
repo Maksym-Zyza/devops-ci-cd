@@ -87,3 +87,14 @@ State-файл з’явився в S3-бакеті та почав викори
 
 ![alt text](assets/terraform-state-s3.png)
 
+###### Vpc
+![alt text](assets/terraform_s3_vps.png)
+
+
+###### AWS VPC
+![alt text](assets/aws_vpc.png)
+
+###### AWS ECR
+![alt text](assets/aws_ecr.png)
+
+

@@ -19,10 +19,10 @@ module "vpc" {
   vpc_name            = "vpc"                                                 # Ім'я VPC
 }
 
-# # Підключаємо модуль ECR
-# module "ecr" {
-#   source      = "./modules/ecr"
-#   ecr_name    = "lesson-5-ecr"
-#   scan_on_push = true
-# }
+# Підключаємо модуль ECR
+module "ecr" {
+  source      = "./modules/ecr"
+  ecr_name    = "lesson-5-ecr"
+  scan_on_push = true
+}
 
