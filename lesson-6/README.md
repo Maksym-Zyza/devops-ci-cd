@@ -102,13 +102,17 @@ terraform destroy
 
 ### ⚙️ Вхідні дані (Variables)
 Основні параметри налаштовуються у файлі main.tf при виклику модулів:
-- vpc_cidr_block: CIDR блок мережі.
-- public_subnets / private_subnets: Списки підмереж.
+- vpc_cidr_block: CIDR блок для VPC.
+- public_subnets: Список ID публічних підмереж.
+- private_subnets: Список ID приватних підмереж.
 - bucket_name: Унікальне ім'я для S3 бакета.
 - repository_name: Ім'я репозиторію.
-- eks_cluster_endpoint:	EKS API endpoint для підключення до кластера
-- eks_cluster_name:	Назва EKS кластера
-- eks_node_role_arn: ARN ролі IAM для EKS робочих вузлів
+- cluster_name: Назва EKS кластера.
+- subnet_ids: ID підмереж для EKS нодів.
+- instance_type: Тип EC2 інстансів для робочих нодів.
+- desired_size: Бажана кількість нодів у групі.
+- max_size: Максимальна кількість нодів.
+- min_size: Мінімальна кількість нодів.
 
 
 #### Створені AWS ресурси
