@@ -1,3 +1,4 @@
+# Вивід S3 бакета та DynamoDB таблиці для бекенду
 output "s3_bucket_name" {
   description = "Назва S3-бакета для стейтів"
   value       = module.s3_backend.s3_bucket_name
@@ -8,3 +9,20 @@ output "dynamodb_table_name" {
   value       = module.s3_backend.dynamodb_table_name
 }
 
+# Вивід VPC
+output "vpc_id" {
+  description = "ID створеної VPC"
+  value       = module.vpc.vpc_id
+}
+
+# Вивід VPC підмереж
+output "public_subnets" {
+  description = "ID публічних підмереж"
+  value       = module.vpc.public_subnets
+}
+
+# Вивід ECR 
+output "ecr_repository_url" {
+  description = "URL ECR репозиторію для Docker push"
+  value       = module.ecr.repository_url
+}
