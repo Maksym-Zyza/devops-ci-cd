@@ -45,3 +45,45 @@ terraform destroy
 
 
 ![alt text](assets/s3-backend.png)
+
+###### Backend configuration (S3 + DynamoDB)
+**backend.tf**
+
+Створіть файл backend.tf у кореневій папці lesson-4.
+
+Цей файл вказує Terraform:
+
+- де зберігати state-файл (Amazon S3)
+
+- як виконувати блокування стану для запобігання паралельним змінам (DynamoDB)
+
+```bash
+⚠️ Важливо:
+S3-бакет і DynamoDB-таблиця вже створені.
+Надалі Terraform буде автоматично зберігати та оновлювати state у цих ресурсах.
+```
+
+```bash
+terraform {
+  backend "s3" {
+    bucket         = "terraform-state-bucket-001001" # Назва S3-бакета
+    key            = "lesson-4/terraform.tfstate"    # Шлях до файлу state
+    region         = "us-west-2"                     # Регіон AWS
+    dynamodb_table = "terraform-locks"               # DynamoDB для state locking
+    encrypt        = true                            # Шифрування state-файлу
+  }
+}
+```
+
+###### Ініціалізація Terraform
+
+Після створення backend.tf виконайте повторну ініціалізацію:
+
+```bash
+terraform init
+```
+
+State-файл з’явився в S3-бакеті та почав використовуватися як remote backend.
+
+![alt text](assets/terraform-state-s3.png)
+
