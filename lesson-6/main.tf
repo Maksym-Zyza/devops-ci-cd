@@ -19,10 +19,20 @@ module "vpc" {
   vpc_name            = "vpc"                                                 # Ім'я VPC
 }
 
-# Підключаємо модуль ECR
 module "ecr" {
-  source      = "./modules/ecr"
-  ecr_name    = "lesson-5-ecr"
-  scan_on_push = true
+  source          = "./modules/ecr"   # Шлях до модуля
+  repository_name = "app-repo"        # Назва репозиторію
+  environment     = "dev"             # Середовище
+  scan_on_push    = true              # Cканування на вразливості після пушу    
+}
+
+module "eks" {
+  source          = "./modules/eks"          
+  cluster_name    = "eks-cluster-demo"            # Назва кластера
+  subnet_ids      = module.vpc.public_subnets     # ID підмереж
+  instance_type   = "t2.micro"                    # Тип інстансів
+  desired_size    = 1                             # Бажана кількість нодів
+  max_size        = 2                             # Максимальна кількість нодів
+  min_size        = 1                             # Мінімальна кількість нодів
 }
 

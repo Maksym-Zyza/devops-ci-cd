@@ -1,6 +1,6 @@
 # Створюємо ECR репозиторій
 resource "aws_ecr_repository" "main" {
-  name                 = var.ecr_name           # Ім'я репозиторію (передається через змінні)
+  name                 = var.repository_name    # Ім'я репозиторію (передається через змінні)
   image_tag_mutability = "MUTABLE"              # Дозволяє перезаписувати теги (зручно для dev/staging)
 
   # Налаштування сканування на вразливості при завантаженні образу
@@ -13,7 +13,7 @@ resource "aws_ecr_repository" "main" {
   force_delete = true
 
   tags = {
-    Name        = var.ecr_name
+    Name        = var.repository_name
     Environment = "learning"
   }
 }

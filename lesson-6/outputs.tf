@@ -26,3 +26,19 @@ output "ecr_repository_url" {
   description = "URL ECR репозиторію для Docker push"
   value       = module.ecr.repository_url
 }
+
+# Вивід EKS
+output "eks_cluster_endpoint" {
+  description = "EKS API endpoint для підключення до кластера"
+  value       = module.eks.cluster_endpoint
+}
+
+output "eks_cluster_name" {
+  description = "Назва EKS кластера"
+  value       = module.eks.cluster_name
+}
+
+output "eks_node_role_arn" {
+  description = "ARN ролі IAM для EKS робочих вузлів"
+  value       = module.eks.node_role_arn
+}
