@@ -96,6 +96,9 @@ terraform destroy
 
 #### Створені AWS ресурси
 
+###### Розгортання інфраструктури в AWS
+![alt text](assets/terraform-apply.png)
+
 ###### AWS S3 Backet
 ![alt text](assets/aws-state-s3.png)
 
