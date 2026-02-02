@@ -21,3 +21,26 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
+# Створюємо таблицю маршрутизації для ПРИВАТНИХ підмереж
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    Name = "${var.vpc_name}-private-rt"
+  }
+}
+
+# Додаємо маршрут: весь трафік (0.0.0.0/0) йде на NAT Gateway
+resource "aws_route" "private_internet" {
+  route_table_id         = aws_route_table.private.id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.main.id
+}
+
+# Прив'язуємо цю таблицю до всіх ПРИВАТНИХ підмереж
+resource "aws_route_table_association" "private" {
+  count          = length(var.private_subnets)
+  subnet_id      = aws_subnet.private[count.index].id
+  route_table_id = aws_route_table.private.id
+}
+

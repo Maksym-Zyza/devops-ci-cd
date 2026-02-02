@@ -31,6 +31,11 @@ output "internet_gateway_id" {
   value       = module.vpc.internet_gateway_id
 }
 
+output "nat_gateway_public_ip" {
+  description = "Публічна IP-адреса NAT Gateway"
+  value       = module.vpc.nat_gateway_public_ip
+}
+
 # ===== Вивід ECR 
 output "ecr_repository_url" {
   description = "URL ECR репозиторію для Docker push"
