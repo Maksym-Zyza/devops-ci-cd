@@ -201,7 +201,7 @@ terraform destroy
 ![alt text](assets/aws_ecr.png)
 
 
-#### Результати виконання
+### Результати виконання:
 1. У вашому AWS-акаунті створено кластер Kubernetes.
 ![alt text](assets/aws_eks.png)
 
@@ -217,13 +217,13 @@ kubectl get pods -n django -w
 ```
 ![alt text](assets/get-pods.png)
 
-Get services:
+- Get services:
 ```bash
 kubectl get svc -n django
 ```
 ![alt text](assets/web-test.png)
 
-Port-forward:
+- Port-forward:
 ```bash
 kubectl port-forward -n django service/django-app 8080:80
 ```
@@ -236,11 +236,13 @@ kubectl exec -n django django-app-cd9bccdd4-lc6k7 -- printenv
 ![alt text](assets/config-map.png)
 
 6. HPA динамічно масштабує кількість подів.
-    Встановлення Metrics Server:
+
+- Встановлення Metrics Server:
 ```bash
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 ```
-    Перевірка HPA:
+
+- Перевірка HPA:
 ```bash
 kubectl get hpa -n django
 ```
