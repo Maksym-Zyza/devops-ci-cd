@@ -118,9 +118,8 @@ lesson-7/
 Налаштуйте `kubectl` для взаємодії з вашим новим EKS кластером.
 
 ```bash
-aws eks update-kubeconfig --region <your-aws-region> --name <your-cluster-name>
+aws eks update-kubeconfig --region us-west-2 --name eks-cluster-demo
 ```
-*Замініть `<your-aws-region>` та `<your-cluster-name>` на ваші актуальні значення, які ви вказали у Terraform-змінних.*
 
 Перевірте підключення:
 ```bash
@@ -132,24 +131,22 @@ kubectl get nodes
 
 a. **Автентифікація Docker у ECR:**
 ```bash
-aws ecr get-login-password --region <your-aws-region> | docker login --username AWS --password-stdin <aws-account-id>.dkr.ecr.<your-aws-region>.amazonaws.com
+aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 088581047201.dkr.ecr.us-west-2.amazonaws.com
 ```
-*Замініть `<your-aws-region>` та `<aws-account-id>`.*
 
 b. **Build Docker-образу:**
 ```bash
-docker build -t <your-ecr-repo-name> .
+docker build -t django-app .
 ```
-*Замініть `<your-ecr-repo-name>` на ім'я, вказане у Terraform.*
 
 c. **Тегування образу:**
 ```bash
-docker tag <your-ecr-repo-name>:latest <aws-account-id>.dkr.ecr.<your-aws-region>.amazonaws.com/<your-ecr-repo-name>:latest
+docker tag django-app:latest 088581047201.dkr.ecr.us-west-2.amazonaws.com/django-app:latest
 ```
 
 d. **Push образу в ECR:**
 ```bash
-docker push <aws-account-id>.dkr.ecr.<your-aws-region>.amazonaws.com/<your-ecr-repo-name>:latest
+docker push 088581047201.dkr.ecr.us-west-2.amazonaws.com/django-app:latest
 ```
 
 #### 3. Розгортання застосунку за допомогою Helm
@@ -158,7 +155,7 @@ a. **Оновіть `values.yaml`:**
 
 ```yaml
 image:
-  repository: <aws-account-id>.dkr.ecr.<your-aws-region>.amazonaws.com/<your-ecr-repo-name>
+  repository: 088581047201.dkr.ecr.us-west-2.amazonaws.com/django-app
   tag: latest
 ```
 
@@ -202,3 +199,6 @@ terraform destroy
 
 ###### AWS ECR
 ![alt text](assets/aws_ecr.png)
+
+###### AWS EKS
+![alt text](assets/aws_eks.png)
