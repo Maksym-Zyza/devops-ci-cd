@@ -136,7 +136,7 @@ aws ecr get-login-password --region us-west-2 | docker login --username AWS --pa
 
 b. **Build Docker-образу:**
 ```bash
-docker build -t django-app .
+docker build --no-cache --platform=linux/amd64 -t 088581047201.dkr.ecr.us-west-2.amazonaws.com/django-app:latest .
 ```
 
 c. **Тегування образу:**
@@ -202,15 +202,46 @@ terraform destroy
 
 
 #### Результати виконання
-+ У вашому AWS-акаунті створено кластер Kubernetes.
+1. У вашому AWS-акаунті створено кластер Kubernetes.
 ![alt text](assets/aws_eks.png)
 
-+ ECR містить завантажений Docker-образ Django-застосунку.
+2. ECR містить завантажений Docker-образ Django-застосунку.
 ![alt text](assets/aws_ecr_image.png)
 
-+ Застосунок розгорнутий у кластері за допомогою Helm-чарта.
+3. Застосунок розгорнутий у кластері за допомогою Helm-чарта.
   ![alt text](assets/helm_chart.png)
 
-Service забезпечує доступ до застосунку через публічну IP-адресу.
-ConfigMap підключено до застосунку через Helm.
-HPA динамічно масштабує кількість подів.
+4. Service забезпечує доступ до застосунку через публічну IP-адресу.
+```bash
+kubectl get pods -n django -w 
+```
+![alt text](assets/get-pods.png)
+
+Get services:
+```bash
+kubectl get svc -n django
+```
+![alt text](assets/web-test.png)
+
+Port-forward:
+```bash
+kubectl port-forward -n django service/django-app 8080:80
+```
+
+5. ConfigMap підключено до застосунку через Helm.
+    Вивести всі змінні середовища поду:
+```bash
+kubectl exec -n django django-app-cd9bccdd4-lc6k7 -- printenv
+```
+![alt text](assets/config-map.png)
+
+6. HPA динамічно масштабує кількість подів.
+    Встановлення Metrics Server:
+```bash
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+```
+    Перевірка HPA:
+```bash
+kubectl get hpa -n django
+```
+![alt text](assets/scaling-test.png)
