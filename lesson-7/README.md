@@ -200,5 +200,17 @@ terraform destroy
 ###### AWS ECR
 ![alt text](assets/aws_ecr.png)
 
-###### AWS EKS
+
+#### Результати виконання
++ У вашому AWS-акаунті створено кластер Kubernetes.
 ![alt text](assets/aws_eks.png)
+
++ ECR містить завантажений Docker-образ Django-застосунку.
+![alt text](assets/aws_ecr_image.png)
+
++ Застосунок розгорнутий у кластері за допомогою Helm-чарта.
+  ![alt text](assets/helm_chart.png)
+
+Service забезпечує доступ до застосунку через публічну IP-адресу.
+ConfigMap підключено до застосунку через Helm.
+HPA динамічно масштабує кількість подів.
