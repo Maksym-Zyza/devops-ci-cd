@@ -1,0 +1,9 @@
+The SECRET_KEY for the django application is now managed by a Kubernetes Secret.
+It is automatically generated when you install the chart.
+
+If you need to manually set the secret, you can create a secret with the name `<release-name>-secret` and the key `SECRET_KEY`.
+For example:
+
+kubectl create secret generic <release-name>-secret --from-literal=SECRET_KEY='your-secret-key'
+
+You can get the release name by running `helm ls`.

@@ -12,7 +12,6 @@ service:
 
 config:
   DEBUG: "0"
-  SECRET_KEY: "change-me"
   ALLOWED_HOSTS: "*"
   DATABASE_HOST: "postgres.example.internal"
   DATABASE_PORT: "5432"
