@@ -12,9 +12,20 @@ resource "aws_iam_role" "eks" {
       "Action": "sts:AssumeRole",  
       "Principal": {
         "Service": "eks.amazonaws.com"  
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = "sts:AssumeRole"
+        Principal = {
+          Service = "eks.amazonaws.com"
+        }
       }
     }
   ]
+    ]
+  })
 }
 POLICY
 }
@@ -36,6 +47,9 @@ resource "aws_eks_cluster" "eks" {
   # ARN IAM-ролі, яка потрібна для керування кластером
   role_arn = aws_iam_role.eks.arn
   
+  # Увімкнення логування для контрольної панелі
+  enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+
   # Налаштування мережі (VPC)
   vpc_config {
     endpoint_private_access = true   # Включає приватний доступ до API-сервера
