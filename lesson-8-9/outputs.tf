@@ -57,3 +57,12 @@ output "eks_node_role_arn" {
   description = "ARN ролі IAM для EKS робочих вузлів"
   value       = module.eks.node_role_arn
 }
+
+# ===== Вивід Jenkins
+output "jenkins_release" {
+  value = module.jenkins.jenkins_release_name
+}
+
+output "jenkins_namespace" {
+  value = module.jenkins.jenkins_namespace
+}
