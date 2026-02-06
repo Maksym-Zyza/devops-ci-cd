@@ -1,3 +1,9 @@
+variable "github_pat" {
+  description = "GitHub Personal Access Token for Jenkins"
+  type        = string
+  sensitive   = true
+}
+
 provider "aws" {
   region = "us-west-2"
 }
@@ -63,6 +69,7 @@ module "jenkins" {
   cluster_name        = module.eks.cluster_name
   oidc_provider_arn   = module.eks.oidc_provider_arn
   oidc_provider_url   = module.eks.oidc_provider_url
+  github_pat          = var.github_pat
 
   providers = {
     helm       = helm
@@ -70,4 +77,3 @@ module "jenkins" {
     aws        = aws
   }
 }
-
