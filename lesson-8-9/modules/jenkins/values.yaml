@@ -48,7 +48,7 @@ controller:
                       scope: GLOBAL
                       id: github-token
                       username: Maksym-Zyza
-                      password: YOUR_GITHUB_PAT_HERE
+                      password: ${github_pat}
                       description: GitHub PAT
       seed-job: |
         jobs:
@@ -58,7 +58,7 @@ controller:
                 scm {
                   git {
                     remote {
-                      url('https://github.com/Maksym-Zyza/devops-ci-cd/tree/lesson-8-9/lesson-8-9/modules/jenkins')
+                      url('https://github.com/Maksym-Zyza/devops-ci-cd.git')
                       credentials('github-token')
                     }
                     branches('*/main')
@@ -73,7 +73,7 @@ controller:
                             scm {
                               git {
                                 remote {
-                                  url("https://github.com/Maksym-Zyza/devops-ci-cd/tree/lesson-8-9/lesson-8-9/modules/jenkins")
+                                  url("https://github.com/Maksym-Zyza/devops-ci-cd.git")
                                   credentials("github-token")
                                 }
                                 branches("*/main")
