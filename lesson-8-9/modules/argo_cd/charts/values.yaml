@@ -1,0 +1,28 @@
+applications:
+  - name: django-app
+    namespace: default
+    project: default
+    source:
+      repoURL: https://github.com/Maksym-Zyza/devops-ci-cd.git
+      path: django-chart
+      targetRevision: main
+      helm:
+        valueFiles:
+          - values.yaml
+    destination:
+      server: <https://kubernetes.default.svc>
+      namespace: default
+    syncPolicy:
+      automated:
+        prune: true
+        selfHeal: true
+
+repositories:
+  - name: example-app
+    url: https://github.com/Maksym-Zyza/devops-ci-cd.git
+    username: Maksym-Zyza
+    password: ${github_pat}
+
+repoConfig:
+  insecure: "true"
+  enableLfs: "true"

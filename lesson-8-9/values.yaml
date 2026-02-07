@@ -1,0 +1,33 @@
+server:
+  service:
+    type: LoadBalancer
+    port: 443
+
+applications:
+  - name: django-app
+    namespace: django
+    project: default
+    source:
+      repoURL: https://github.com/Maksym-Zyza/devops-ci-cd.git
+      path: charts/django-app
+      targetRevision: main
+      helm:
+        valueFiles:
+          - values.yaml
+    destination:
+      server: https://kubernetes.default.svc
+      namespace: django
+    syncPolicy:
+      automated:
+        prune: true
+        selfHeal: true
+      syncOptions:
+        - CreateNamespace=true
+
+repositories:
+  - name: devops-repo
+    url: https://github.com/Maksym-Zyza/devops-ci-cd.git
+    # Якщо репозиторій приватний, додайте username та password (PAT)
+
+repoConfig:
+  insecure: "true"

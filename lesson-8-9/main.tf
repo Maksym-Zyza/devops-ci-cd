@@ -77,3 +77,16 @@ module "jenkins" {
     aws        = aws
   }
 }
+    
+module "argo_cd" {
+  source        = "./modules/argo_cd"
+  name          = "argo-cd"
+  namespace     = "argocd"
+  chart_version = "5.46.4"
+
+  providers = {
+    helm       = helm
+    kubernetes = kubernetes
+    aws        = aws
+  }
+}
