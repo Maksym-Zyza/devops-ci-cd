@@ -58,7 +58,7 @@ spec:
         container('git') {
           withCredentials([usernamePassword(credentialsId: 'github-token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PAT')]) {
             sh '''
-              git clone https://$GIT_USERNAME:$GIT_PAT@github.com/Maksym-Zyza/devops-ci-cd.git
+              git clone -b lesson-8-9 https://$GIT_USERNAME:$GIT_PAT@github.com/Maksym-Zyza/devops-ci-cd.git
               cd devops-ci-cd/lesson-8-9/charts/django-app
 
               sed -i "s/tag: .*/tag: $IMAGE_TAG/" values.yaml
@@ -68,7 +68,7 @@ spec:
 
               git add values.yaml
               git commit -m "Update image tag to $IMAGE_TAG"
-              git push origin main
+              git push origin lesson-8-9
             '''
           }
         }
