@@ -99,6 +99,7 @@ resource "helm_release" "jenkins" {
   chart            = "jenkins"
   version          = "5.8.27"
   create_namespace = true
+  timeout          = 900
 
   values = [
     templatefile("${path.module}/values.yaml", {
