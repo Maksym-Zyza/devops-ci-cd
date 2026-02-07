@@ -67,18 +67,18 @@ spec:
                 # 1. Дозволяємо Git працювати з цією директорією
                 git config --global --add safe.directory '*'
 
-                # 2. Налаштовуємо дані користувача
+                # 2. Налаштовуємо Git
                 git config user.email "jenkins@localhost"
                 git config user.name "jenkins"
                 
                 # 3. Оновлюємо тег у values.yaml (шлях ми підтвердили через Debug)
-                sed -i "s/tag: .*/tag: ${IMAGE_TAG}/g" lesson-8-9/lesson-8-9/charts/django-app/values.yaml
+                sed -i "s/tag: .*/tag: ${IMAGE_TAG}/g" lesson-8-9/charts/django-app/values.yaml
 
-                # 4. Комітимо та пушимо
-                git add lesson-8-9/lesson-8-9/charts/django-app/values.yaml
+                # 4. Комітимо та пушимо зміни
+                git add lesson-8-9/charts/django-app/values.yaml
                 git commit -m "Update image tag to ${IMAGE_TAG} [skip ci]"
                 
-                # Використовуємо ваш токен для авторизації
+                # Пушимо в гілку lesson-8-9
                 git push https://${GIT_PAT}@github.com/Maksym-Zyza/devops-ci-cd.git HEAD:lesson-8-9
             """
           }
