@@ -79,7 +79,7 @@ spec:
                 git commit -m "Update image tag to ${IMAGE_TAG} [skip ci]"
                 
                 # Пушимо в гілку lesson-8-9
-                git push https://${GIT_PAT}@github.com/Maksym-Zyza/devops-ci-cd.git HEAD:lesson-8-9
+                git push https://${GIT_USERNAME}:${GIT_PAT}@github.com/Maksym-Zyza/devops-ci-cd.git HEAD:lesson-8-9
             """
           }
         }
