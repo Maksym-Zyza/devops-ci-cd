@@ -34,14 +34,13 @@ spec:
     stage('Build & Push Docker Image') {
       steps {
         container('kaniko') {
-          // Використовуємо одинарні лапки для sh, щоб уникнути плутанини зі змінними Groovy/Shell
-          sh '''
+            sh """
             /kaniko/executor \
-              --context ${WORKSPACE}/lesson-8-9/lesson-8-9 \
-              --dockerfile Dockerfile \
-              --destination ${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} \
-              --cache=true
-          '''
+            --context ${WORKSPACE}/lesson-8-9/lesson-8-9/django-docker-project \
+            --dockerfile Dockerfile \
+            --destination ${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} \
+            --cache=true
+            """
         }
       }
     }
@@ -55,7 +54,7 @@ spec:
               git config user.email "jenkins@localhost"
               git config user.name "jenkins"
               
-              # Оновлюємо тег у values.yaml (шлях від кореня репозиторію)
+              # Шлях від кореня репозиторію
               sed -i "s/tag: .*/tag: ${IMAGE_TAG}/g" lesson-8-9/lesson-8-9/charts/django-app/values.yaml
 
               # Стейджимо та пушимо зміни прямо в поточну гілку
