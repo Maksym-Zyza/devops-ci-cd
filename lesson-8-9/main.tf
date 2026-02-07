@@ -83,6 +83,7 @@ module "argo_cd" {
   name          = "argo-cd"
   namespace     = "argocd"
   chart_version = "5.46.4"
+  github_pat    = var.github_pat
 
   providers = {
     helm       = helm
