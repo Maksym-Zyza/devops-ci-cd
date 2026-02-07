@@ -31,6 +31,20 @@ spec:
   }
 
   stages {
+    stage('Debug: Find Dockerfile') {
+        steps {
+            container('git') {
+            sh """
+                echo "=== ПОШУК DOCKERFILE ==="
+                find ${WORKSPACE} -name Dockerfile
+                echo "=== ПОТОЧНА ДИРЕКТОРІЯ ==="
+                pwd
+                ls -R ${WORKSPACE}/lesson-8-9
+            """
+            }
+        }
+    }
+
     stage('Build & Push Docker Image') {
       steps {
         container('kaniko') {
