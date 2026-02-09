@@ -18,3 +18,8 @@ variable "github_pat" {
   type        = string
   sensitive   = true
 }
+
+variable "ecr_repository_url" {
+  description = "The URL of the ECR repository"
+  type        = string
+}

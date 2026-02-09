@@ -24,8 +24,6 @@ spec:
   }
 
   environment {
-    ECR_REGISTRY = "088581047201.dkr.ecr.us-west-2.amazonaws.com"
-    IMAGE_NAME   = "django-app"
     IMAGE_TAG    = "v${BUILD_NUMBER}"
     REPO_URL     = "github.com/Maksym-Zyza/devops-ci-cd.git"
   }
@@ -39,7 +37,6 @@ spec:
                 find ${WORKSPACE} -name Dockerfile
                 echo "=== ПОТОЧНА ДИРЕКТОРІЯ ==="
                 pwd
-                ls -R ${WORKSPACE}/lesson-db-module
             """
             }
         }
@@ -52,7 +49,7 @@ spec:
             /kaniko/executor \
             --context ${WORKSPACE}/django-docker-project \
             --dockerfile Dockerfile \
-            --destination ${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} \
+            --destination ${ECR_REPOSITORY_URL}:${IMAGE_TAG} \
             --cache=true
             """
         }
@@ -72,6 +69,7 @@ spec:
                 git config user.name "jenkins"
                 
                 # 3. Оновлюємо тег у values.yaml (шлях ми підтвердили через Debug)
+                sed -i "s|repository: .*|repository: ${ECR_REPOSITORY_URL}|g" lesson-db-module/charts/django-app/values.yaml
                 sed -i "s/tag: .*/tag: ${IMAGE_TAG}/g" lesson-db-module/charts/django-app/values.yaml
 
                 # 4. Комітимо та пушимо зміни

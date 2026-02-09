@@ -103,7 +103,8 @@ resource "helm_release" "jenkins" {
 
   values = [
     templatefile("${path.module}/values.yaml", {
-      github_pat = var.github_pat
+      github_pat         = var.github_pat
+      ecr_repository_url = var.ecr_repository_url
     })
   ]
 }

@@ -39,6 +39,13 @@ controller:
 
   JCasC:
     configScripts:
+      global-vars: |
+        jenkins:
+          globalNodeProperties:
+            - envVars:
+                env:
+                  - key: ECR_REPOSITORY_URL
+                    value: ${ecr_repository_url}
       credentials: |
         credentials:
           system:
