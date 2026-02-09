@@ -1,104 +1,131 @@
 variable "name" {
-  description = "Назва інстансу або кластера"
+  description = "Name of the RDS instance or Aurora cluster"
   type        = string
+}
+
+variable "use_aurora" {
+  description = "Boolean to control whether to deploy Aurora (true) or Standard RDS (false)"
+  type        = bool
+  default     = false
 }
 
 variable "engine" {
+  description = "The database engine for Standard RDS (e.g., postgres, mysql)"
   type        = string
   default     = "postgres"
 }
-variable "engine_cluster" {
-  type    = string
-  default = "aurora-postgresql"
-}
-variable "aurora_replica_count" {
-  type    = number
-  default = 1
-}
 
-variable "aurora_instance_count" {
-  type    = number
-  default = 2 # 1 primary + 1 replica
-}
 variable "engine_version" {
+  description = "The engine version for Standard RDS"
   type        = string
   default     = "14.7"
 }
 
+variable "engine_cluster" {
+  description = "The database engine for Aurora Cluster (e.g., aurora-postgresql, aurora-mysql)"
+  type        = string
+  default     = "aurora-postgresql"
+}
+
+variable "engine_version_cluster" {
+  description = "The engine version for Aurora Cluster"
+  type        = string
+  default     = "15.3"
+}
+
 variable "instance_class" {
+  description = "The instance class (e.g., db.t3.micro for RDS, db.t3.medium for Aurora)"
   type        = string
   default     = "db.t3.micro"
 }
 
 variable "allocated_storage" {
+  description = "The allocated storage in GB (Standard RDS only)"
   type        = number
   default     = 20
 }
 
 variable "db_name" {
-  type = string
+  description = "The name of the database to create"
+  type        = string
 }
 
 variable "username" {
-  type = string
+  description = "Username for the master DB user"
+  type        = string
 }
 
 variable "password" {
-  type      = string
-  sensitive = true
+  description = "Password for the master DB user"
+  type        = string
+  sensitive   = true
 }
 
 variable "vpc_id" {
-  type = string
+  description = "The VPC ID where resources will be created"
+  type        = string
 }
 
 variable "subnet_private_ids" {
-  type = list(string)
+  description = "List of private subnet IDs"
+  type        = list(string)
 }
 
 variable "subnet_public_ids" {
-  type = list(string)
+  description = "List of public subnet IDs (used if publicly_accessible is true)"
+  type        = list(string)
 }
 
 variable "publicly_accessible" {
-  type    = bool
-  default = false
+  description = "Whether the DB should be publicly accessible"
+  type        = bool
+  default     = false
 }
 
 variable "multi_az" {
-  type    = bool
-  default = false
-}
-
-variable "parameters" {
-  type    = map(string)
-  default = {}
-}
-
-variable "use_aurora" {
-  type    = bool
-  default = false
+  description = "Specifies if the RDS instance is multi-AZ"
+  type        = bool
+  default     = false
 }
 
 variable "backup_retention_period" {
-  type    = string
-  default = ""
+  description = "The days to retain backups for"
+  type        = number
+  default     = 7
 }
 
-variable "tags" {
-  type    = map(string)
-  default = {}
+variable "parameters" {
+  description = "A map of DB parameters to apply to the parameter group (e.g., max_connections, work_mem)"
+  type        = map(string)
+  default     = {}
+}
+
+variable "parameter_group_family_rds" {
+  description = "The family of the DB parameter group for Standard RDS (e.g., postgres14)"
+  type        = string
+  default     = "postgres14"
 }
 
 variable "parameter_group_family_aurora" {
-  type    = string
-  default = "aurora-postgresql15"
+  description = "The family of the DB parameter group for Aurora (e.g., aurora-postgresql15)"
+  type        = string
+  default     = "aurora-postgresql15"
 }
-variable "engine_version_cluster" {
-  type    = string
-  default = "15.3"
+
+variable "aurora_instance_count" {
+  description = "Number of instances in the Aurora cluster (1 writer + N readers)"
+  type        = number
+  default     = 2
 }
-variable "parameter_group_family_rds" {
-  type    = string
-  default = "postgres15"
+
+variable "aurora_replica_count" {
+  description = "Number of reader replicas for Aurora (variable used in logic, though aurora_instance_count is usually preferred for total count)"
+  type        = number
+  default     = 1
+}
+
+variable "tags" {
+  description = "A map of tags to assign to resources"
+  type        = map(string)
+  default     = {}
 }

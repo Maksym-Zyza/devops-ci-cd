@@ -93,76 +93,44 @@ module "argo_cd" {
   }
 }
 
-// RDB Postgres
+# RDS (Aurora / Standard)
 module "rds" {
   source = "./modules/rds"
 
-  name                       = "myapp-db"
-  use_aurora                 = false
-  aurora_instance_count      = 2
+  name = "myapp-db"
 
-  # --- RDS-only ---
-  engine                     = "postgres"
-  engine_version             = "17.2"
-  parameter_group_family_rds = "postgres17"
+  # --- Перемикач: Aurora / Standard RDS ---
+  use_aurora = true
 
-  # Common
-  instance_class             = "db.t3.medium"
-  allocated_storage          = 20
-  db_name                    = "myapp"
-  username                   = "postgres"
-  password                   = "admin123AWS23"
-  subnet_private_ids         = module.vpc.private_subnets
-  subnet_public_ids          = module.vpc.public_subnets
-  publicly_accessible        = true
-  vpc_id                     = module.vpc.vpc_id
-  multi_az                   = true
-  backup_retention_period    = 7
-  parameters = {
-    max_connections              = "200"
-    log_min_duration_statement   = "500"
-  }
-
-  tags = {
-    Environment = "dev"
-    Project     = "myapp"
-  }
-} 
-
-// RDB Aurora-Postgresql
-module "rds" {
-  source = "./modules/rds"
-
-  name                       = "myapp-db"
-  use_aurora                 = true
-  aurora_instance_count      = 2
-
-  # --- Aurora-only ---
-  engine_cluster             = "aurora-postgresql"
-  engine_version_cluster     = "15.3"
+  # --- Конфігурація Aurora ---
+  engine_cluster                = "aurora-postgresql"
+  engine_version_cluster        = "15.3"
   parameter_group_family_aurora = "aurora-postgresql15"
-  
+  aurora_instance_count         = 2
 
-  # --- RDS-only ---
+  # --- Конфігурація Standard RDS ---
   engine                     = "postgres"
-  engine_version             = "17.2"
-  parameter_group_family_rds = "postgres17"
-
-  # Common
-  instance_class             = "db.t3.medium"
+  engine_version             = "14.7"
+  parameter_group_family_rds = "postgres14"
   allocated_storage          = 20
-  db_name                    = "myapp"
-  username                   = "postgres"
-  password                   = "admin123AWS23"
-  subnet_private_ids         = module.vpc.private_subnets
-  subnet_public_ids          = module.vpc.public_subnets
-  publicly_accessible        = true
-  vpc_id                     = module.vpc.vpc_id
-  multi_az                   = true
-  backup_retention_period    = 7
+
+  # --- Спільні параметри ---
+  instance_class          = "db.t3.medium" # Aurora зазвичай вимагає мінімум t3.medium
+  db_name                 = "myapp"
+  username                = "postgres"
+  password                = "admin123AWS23"
+  vpc_id                  = module.vpc.vpc_id
+  subnet_private_ids      = module.vpc.private_subnets
+  subnet_public_ids       = module.vpc.public_subnets
+  publicly_accessible     = true
+  multi_az                = true
+  backup_retention_period = 7
+
+  # Параметри для Parameter Group (працюють для обох типів)
   parameters = {
-    max_connections              = "200"
-    log_min_duration_statement   = "500"
+    max_connections            = "200"
+    log_min_duration_statement = "500"
+    work_mem                   = "16MB"
   }
 
   tags = {
