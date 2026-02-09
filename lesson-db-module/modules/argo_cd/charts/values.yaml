@@ -4,8 +4,8 @@ applications:
     project: default
     source:
       repoURL: https://github.com/Maksym-Zyza/devops-ci-cd.git
-      path: lesson-8-9/charts/django-app
-      targetRevision: lesson-8-9
+      path: lesson-db-module/charts/django-app
+      targetRevision: lesson-db-module
       helm:
         valueFiles:
           - values.yaml

@@ -32,7 +32,7 @@
 ## 📂 Структура проєкту
 
 ```bash
-lesson-db-module/
+lesson-8-9/
 │
 │
 ├── main.tf                  # Головний файл для підключення модулів
@@ -104,7 +104,7 @@ lesson-db-module/
 *   GitHub Personal Access Token (PAT) з правами `repo`.
 
 ### 2. Налаштування змінних
-Створіть файл `terraform.tfvars` у корені директорії `lesson-db-module/`:
+Створіть файл `terraform.tfvars` у корені директорії `lesson-8-9/`:
 
 ```hcl
 github_pat = "ghp_YOUR_GITHUB_TOKEN_HERE"
@@ -115,7 +115,7 @@ github_pat = "ghp_YOUR_GITHUB_TOKEN_HERE"
 Ініціалізуйте та застосуйте конфігурацію:
 
 ```bash
-cd lesson-db-module
+cd lesson-8-9
 terraform init
 terraform apply --auto-approve
 ```

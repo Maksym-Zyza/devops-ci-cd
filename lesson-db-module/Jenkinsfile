@@ -39,7 +39,7 @@ spec:
                 find ${WORKSPACE} -name Dockerfile
                 echo "=== ПОТОЧНА ДИРЕКТОРІЯ ==="
                 pwd
-                ls -R ${WORKSPACE}/lesson-8-9
+                ls -R ${WORKSPACE}/lesson-db-module
             """
             }
         }
@@ -72,14 +72,14 @@ spec:
                 git config user.name "jenkins"
                 
                 # 3. Оновлюємо тег у values.yaml (шлях ми підтвердили через Debug)
-                sed -i "s/tag: .*/tag: ${IMAGE_TAG}/g" lesson-8-9/charts/django-app/values.yaml
+                sed -i "s/tag: .*/tag: ${IMAGE_TAG}/g" lesson-db-module/charts/django-app/values.yaml
 
                 # 4. Комітимо та пушимо зміни
-                git add lesson-8-9/charts/django-app/values.yaml
+                git add lesson-db-module/charts/django-app/values.yaml
                 git commit -m "Update image tag to ${IMAGE_TAG} [skip ci]"
                 
-                # Пушимо в гілку lesson-8-9
-                git push https://${GIT_USERNAME}:${GIT_PAT}@github.com/Maksym-Zyza/devops-ci-cd.git HEAD:lesson-8-9
+                # Пушимо в гілку lesson-db-module
+                git push https://${GIT_USERNAME}:${GIT_PAT}@github.com/Maksym-Zyza/devops-ci-cd.git HEAD:lesson-db-module
             """
           }
         }
