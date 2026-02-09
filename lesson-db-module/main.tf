@@ -102,11 +102,11 @@ module "rds" {
   # --- Перемикач: Aurora / Standard RDS ---
   use_aurora = true
 
-  # --- Конфігурація Aurora ---
+  # --- Конфігурація Aurora (використовується, коли use_aurora = true) ---
   engine_cluster                = "aurora-postgresql"
   engine_version_cluster        = "15.3"
   parameter_group_family_aurora = "aurora-postgresql15"
-  aurora_instance_count         = 2
+  aurora_replica_count          = 1 # 1 Reader + 1 Writer = 2 Instances
 
   # --- Конфігурація Standard RDS ---
   engine                     = "postgres"
@@ -115,7 +115,7 @@ module "rds" {
   allocated_storage          = 20
 
   # --- Спільні параметри ---
-  instance_class          = "db.t3.medium" # Aurora зазвичай вимагає мінімум t3.medium
+  instance_class          = "db.t3.medium" 
   db_name                 = "myapp"
   username                = "postgres"
   password                = "admin123AWS23"
