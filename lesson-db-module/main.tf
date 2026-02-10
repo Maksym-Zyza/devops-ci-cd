@@ -4,6 +4,24 @@ variable "github_pat" {
   sensitive   = true
 }
 
+variable "db_name" {
+  description = "The name of the database"
+  type        = string
+  default     = "myapp"
+}
+
+variable "db_username" {
+  description = "Username for the master DB user"
+  type        = string
+  default     = "postgres"
+}
+
+variable "db_password" {
+  description = "Password for the master DB user"
+  type        = string
+  sensitive   = true
+}
+
 provider "aws" {
   region = "us-west-2"
 }
@@ -116,9 +134,9 @@ module "rds" {
 
   # --- Спільні параметри ---
   instance_class          = "db.t3.medium" 
-  db_name                 = "myapp"
-  username                = "postgres"
-  password                = "admin123AWS23"
+  db_name                 = var.db_name
+  username                = var.db_username
+  password                = var.db_password
   vpc_id                  = module.vpc.vpc_id
   subnet_private_ids      = module.vpc.private_subnets
   subnet_public_ids       = module.vpc.public_subnets

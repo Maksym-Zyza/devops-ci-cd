@@ -101,59 +101,106 @@ Project/
 
 ---
 
-## 💾 Модуль RDS
+## 🚀 Інструкція з розгортання
 
-Універсальний модуль `rds` дозволяє створювати як звичайні RDS інстанси, так і Aurora кластери через змінну `use_aurora`.
+### 1. Попередні вимоги
+*   AWS CLI (налаштований `aws configure`)
+*   Terraform (v1.0+)
+*   kubectl
+*   GitHub Personal Access Token (PAT) з правами `repo`.
 
-### Приклади використання
+### 2. Налаштування змінних
+Створіть файл `terraform.tfvars` у корені директорії `lesson-8-9/`:
 
-#### 1. Standard RDS (PostgreSQL)
 ```hcl
-module "rds" {
-  source = "./modules/rds"
-  name   = "myapp-db"
-  use_aurora = false
-  
-  engine         = "postgres"
-  engine_version = "14.20"
-  instance_class = "db.t3.micro"
-  
-  db_name  = "myapp"
-  username = "postgres"
-  password = "adminpassword"
-  
-  vpc_id             = module.vpc.vpc_id
-  subnet_private_ids = module.vpc.private_subnets
-  subnet_public_ids  = module.vpc.public_subnets
-}
+github_pat = "ghp_YOUR_GITHUB_TOKEN_HERE"
+```
+> **Увага:** Додайте `terraform.tfvars` у `.gitignore`. Ніколи не комітьте секрети.
+
+### 3. Запуск Terraform
+Ініціалізуйте та застосуйте конфігурацію:
+
+```bash
+cd lesson-8-9
+terraform init
+terraform apply --auto-approve
 ```
 
-#### 2. Aurora Cluster
-```hcl
-module "rds" {
-  source = "./modules/rds"
-  name   = "myapp-aurora"
-  use_aurora = true
-  
-  engine_cluster         = "aurora-postgresql"
-  engine_version_cluster = "15.15"
-  instance_class         = "db.t3.medium"
-  
-  db_name  = "myapp"
-  username = "postgres"
-  password = "adminpassword"
-  
-  vpc_id             = module.vpc.vpc_id
-  subnet_private_ids = module.vpc.private_subnets
-}
+Ця команда:
+1.  Створить мережу та кластер EKS.
+2.  Створить репозиторій ECR.
+3.  Встановить Jenkins та налаштує Job'и (JCasC).
+4.  Встановить Argo CD та зареєструє Application `django-app`.
+
+### 4. Доступ до сервісів
+
+#### Отримання доступу до кластера (kubeconfig):
+```bash
+aws eks update-kubeconfig --region us-west-2 --name eks-cluster-demo
 ```
 
-![alt text](db_aurora.png)
+#### Jenkins:
+```bash
+# Отримати URL
+kubectl get svc jenkins -n jenkins
 
-### Основні змінні
-*   `use_aurora`: Перемикач між RDS (`false`) та Aurora (`true`).
-*   `parameters`: Map параметрів для Parameter Group (напр. `max_connections`).
-*   `publicly_accessible`: Керує доступом та вибором підмереж (public/private).
-*   `aurora_replica_count`: Кількість реплік для Aurora.
+# Логін/Пароль (дефолтні з values.yaml)
+User: admin
+Pass: admin123
+```
+
+##### Налаштування Jenkins:
+- Зайдіть у Jenkins (URL з виводу Terraform).
+- Запустіть seed-job, щоб створити пайплайн.
+- Схваліть скрипт у Manage Jenkins -> In-process Script Approval.
 
 
+#### Argo CD:
+```bash
+# Отримати URL (LoadBalancer)
+kubectl get svc argo-cd-argocd-server -n argocd
+
+# Отримати пароль admin (автоматично згенерований)
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
+User: admin
+```
+
+#### CI/CD процес:
+- Запустіть джобу django-docker.
+- Jenkins збере образ через Kaniko, завантажить його в ECR та оновить тег у values.yaml.
+![alt text](assets/values.png)
+
+
+#### 📊 Результат:
+- Jenkins: Переконайтеся, що остання збірка django-docker позначена зеленим кольором.
+![alt text](assets/jenkins.png)
+
+- Argo CD: У дашборд Argo CD django-app у статусі Synced - зміни з Git автоматично розгорнуті в кластері.
+![alt text](assets/argo_cd.png)
+![alt text](assets/argo_cd_2.png)
+
+Додаток: Перевірте роботу Django за посиланням балансувальника: 
+```bash
+kubectl get svc django-app -n default
+```
+
+---
+
+## 🔄 CI/CD Workflow (Як це працює)
+
+1.  **Code Change:** Розробник робить зміни в коді та пушить в GitHub.
+2.  **Jenkins Trigger:** `seed-job` (або webhook) запускає пайплайн `django-docker`.
+3.  **Build:** Jenkins (Kaniko) збирає Docker-образ.
+4.  **Push:** Образ пушиться в AWS ECR з тегом `v1.0.${BUILD_NUMBER}`.
+5.  **Git Update:** Jenkins клонує репозиторій з Helm-чартом, оновлює `tag` у файлі `charts/django-app/values.yaml` і робить `git push`.
+6.  **Argo Sync:** Argo CD (який моніторить Git-репозиторій) бачить зміни в `values.yaml`.
+7.  **Deployment:** Argo CD застосовує зміни до кластера (оновлює Deployment, щоб використати новий образ).
+
+---
+
+## 🧹 Видалення ресурсів
+
+
+```bash
+terraform destroy --auto-approve
+```

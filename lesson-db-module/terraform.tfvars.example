@@ -1,0 +1,4 @@
+github_pat  = "ghp_YOUR_GITHUB_TOKEN_HERE"
+db_name     = "myapp"
+db_username = "postgres"
+db_password = "your_secure_password_here"
