@@ -18,7 +18,7 @@ variable "engine" {
 variable "engine_version" {
   description = "The engine version for Standard RDS"
   type        = string
-  default     = "14.7"
+  default     = "14.20"
 }
 
 variable "engine_cluster" {

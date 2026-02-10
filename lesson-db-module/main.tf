@@ -100,7 +100,7 @@ module "rds" {
   name = "myapp-db"
 
   # --- Перемикач: Aurora / Standard RDS ---
-  use_aurora = true
+  use_aurora = false
 
   # --- Конфігурація Aurora (використовується, коли use_aurora = true) ---
   engine_cluster                = "aurora-postgresql"
@@ -108,9 +108,9 @@ module "rds" {
   parameter_group_family_aurora = "aurora-postgresql15"
   aurora_replica_count          = 1 # 1 Reader + 1 Writer = 2 Instances
 
-  # --- Конфігурація Standard RDS ---
+  # --- Конфігурація Standard RDS (використовується, коли use_aurora = false) ---
   engine                     = "postgres"
-  engine_version             = "14.7"
+  engine_version             = "14.20"
   parameter_group_family_rds = "postgres14"
   allocated_storage          = 20
 
