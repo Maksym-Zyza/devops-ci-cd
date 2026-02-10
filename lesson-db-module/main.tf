@@ -104,7 +104,7 @@ module "rds" {
 
   # --- Конфігурація Aurora (використовується, коли use_aurora = true) ---
   engine_cluster                = "aurora-postgresql"
-  engine_version_cluster        = "15.3"
+  engine_version_cluster        = "15.15"
   parameter_group_family_aurora = "aurora-postgresql15"
   aurora_replica_count          = 1 # 1 Reader + 1 Writer = 2 Instances
 
@@ -130,7 +130,7 @@ module "rds" {
   parameters = {
     max_connections            = "200"
     log_min_duration_statement = "500"
-    work_mem                   = "16MB"
+    work_mem                   = "16384" # 16MB in kB
   }
 
   tags = {

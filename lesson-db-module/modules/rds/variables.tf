@@ -30,7 +30,7 @@ variable "engine_cluster" {
 variable "engine_version_cluster" {
   description = "The engine version for Aurora Cluster"
   type        = string
-  default     = "15.3"
+  default     = "15.15"
 }
 
 variable "instance_class" {
