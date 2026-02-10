@@ -179,5 +179,5 @@ module "rds" {
 - Aurora Cluster:
 ![alt text](assets/db_aurora.png)
 
-DB Conection:
-- ![alt text](assets/db_conection.png)
+- DB Connection:
+- ![alt text](assets/db_connection.png)
