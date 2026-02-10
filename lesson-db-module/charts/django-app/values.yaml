@@ -1,8 +1,8 @@
 replicaCount: 2
 
 image:
-  repository: REPLACE_ME_BY_PIPELINE
-  tag: latest
+  repository: 088581047201.dkr.ecr.us-west-2.amazonaws.com/django-app
+  tag: v1
   pullPolicy: IfNotPresent
 
 service:
