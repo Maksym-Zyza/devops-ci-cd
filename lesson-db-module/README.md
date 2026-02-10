@@ -165,7 +165,7 @@ module "rds" {
 
 
 - DB Subnet Group:
-![alt text](assets/db-subnet-group.png.png)
+![alt text](assets/db-subnet-group.png)
 
 - DB Subnet Group:
 ![alt text](assets/db_subnet_group.png)
@@ -180,4 +180,4 @@ module "rds" {
 ![alt text](assets/db_aurora.png)
 
 DB Conection:
-- ![alt text](assests/db_conection.png)
+- ![alt text](assets/db_conection.png)
