@@ -154,6 +154,9 @@ module "rds" {
 | `publicly_accessible` | bool | Чи доступна БД з інтернету | `false` |
 | `parameters` | map | Кастомні параметри БД (max_connections, work_mem тощо) | `{}` |
 | `aurora_replica_count` | number | Кількість реплік читання для Aurora | `1` |
+| `port` | number | Порт бази даних | `5432` |
+| `allowed_cidr_blocks` | list | Список дозволених IP/CIDR для доступу | `[]` |
+| `allowed_security_groups` | list | Список дозволених Security Group ID | `[]` |
 
 ### Як змінити конфігурацію
 

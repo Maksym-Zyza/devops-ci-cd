@@ -22,6 +22,12 @@ variable "db_password" {
   sensitive   = true
 }
 
+variable "db_port" {
+  description = "The port for the database"
+  type        = number
+  default     = 5432
+}
+
 provider "aws" {
   region = "us-west-2"
 }
@@ -143,6 +149,10 @@ module "rds" {
   publicly_accessible     = true
   multi_az                = true
   backup_retention_period = 7
+
+  # Security
+  port                = var.db_port
+  allowed_cidr_blocks = ["0.0.0.0/0"] # Увага: Для production змініть на конкретні IP
 
   # Параметри для Parameter Group (працюють для обох типів)
   parameters = {

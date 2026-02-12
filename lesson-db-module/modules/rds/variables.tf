@@ -129,3 +129,21 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "port" {
+  description = "Database port"
+  type        = number
+  default     = 5432
+}
+
+variable "allowed_cidr_blocks" {
+  description = "List of CIDR blocks allowed to access the DB"
+  type        = list(string)
+  default     = []
+}
+
+variable "allowed_security_groups" {
+  description = "List of Security Group IDs allowed to access the DB"
+  type        = list(string)
+  default     = []
+}

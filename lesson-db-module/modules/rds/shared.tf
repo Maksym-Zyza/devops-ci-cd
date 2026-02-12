@@ -11,12 +11,30 @@ resource "aws_security_group" "rds" {
   description = "Security group for RDS"
   vpc_id      = var.vpc_id
 
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # або змінна
+  # Rule for CIDR blocks (e.g. VPN, local IP)
+  dynamic "ingress" {
+    for_each = length(var.allowed_cidr_blocks) > 0 ? [1] : []
+    content {
+      from_port   = var.port
+      to_port     = var.port
+      protocol    = "tcp"
+      cidr_blocks = var.allowed_cidr_blocks
+    }
   }
+
+  # Rule for other Security Groups (e.g. EKS nodes, Bastion)
+  dynamic "ingress" {
+    for_each = length(var.allowed_security_groups) > 0 ? [1] : []
+    content {
+      from_port       = var.port
+      to_port         = var.port
+      protocol        = "tcp"
+      security_groups = var.allowed_security_groups
+    }
+  }
+
+  # Default rule: Allow access from VPC CIDR (Optional - consider removing for strict security)
+  # For now, let's keep it safe by NOT allowing 0.0.0.0/0 by default unless explicitly passed in allowed_cidr_blocks.
 
   egress {
     from_port   = 0
