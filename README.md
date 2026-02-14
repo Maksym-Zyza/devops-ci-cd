@@ -8,14 +8,15 @@
 
 ## 📋 Завдання проєкту
 
-1.  **Автоматизація інфраструктури (IaC):** Розгортання EKS, ECR, VPC, Jenkins та Argo CD за допомогою Terraform.
+1.  **Автоматизація інфраструктури (IaC):** Розгортання EKS, ECR, VPC, Jenkins, Argo CD та Monitoring (Prometheus/Grafana) за допомогою Terraform.
 2.  **Continuous Integration (CI):** 
     *   Автоматична збірка Docker-образу Django-застосунку.
     *   Публікація образу в Amazon ECR.
 3.  **Continuous Delivery (CD) / GitOps:**
     *   Автоматичне оновлення версії образу (тегу) у Helm-чарті (в Git-репозиторії).
     *   Argo CD автоматично помічає зміни в Git та синхронізує стан кластера (Deployments, Services, ConfigMaps).
-4.  **Бази даних:** Розгортання універсального модуля RDS з підтримкою Aurora та Standard RDS.
+4.  **Моніторинг:** Збір метрик кластера та візуалізація стану через Grafana.
+5.  **Бази даних:** Розгортання універсального модуля RDS з підтримкою Aurora та Standard RDS.
 
 ---
 
@@ -25,6 +26,7 @@
 *   **Infrastructure as Code:** Terraform.
 *   **CI Server:** Jenkins (Running on K8s, using Kubernetes Agent & Kaniko for Docker builds).
 *   **CD / GitOps:** Argo CD (App of Apps pattern).
+*   **Monitoring:** Prometheus & Grafana (kube-prometheus-stack).
 *   **Package Manager:** Helm.
 *   **Application:** Python Django.
 
@@ -76,18 +78,24 @@ Project/
 │   │   ├── values.yaml      # Конфігурація jenkins
 │   │   └── outputs.tf       # Виводи (URL, пароль адміністратора)
 │   │ 
-│   └── argo_cd/             # Mодуль для Helm-установки Argo CD
-│       ├── jenkins.tf       # Helm release для Jenkins
-│       ├── variables.tf     # Змінні (версія чарта, namespace, repo URL тощо)
-│       ├── providers.tf     # Kubernetes+Helm.  переносимо з модуля jenkins
-│       ├── values.yaml      # Кастомна конфігурація Argo CD
-│       ├── outputs.tf       # Виводи (hostname, initial admin password)
-│                   └──charts/                  # Helm-чарт для створення app'ів
-│                   ├── Chart.yaml
-│                   ├── values.yaml          # Список applications, repositories
-│                           └── templates/
-│                       ├── application.yaml
-│                       └── repository.yaml
+│   ├── argo_cd/             # Mодуль для Helm-установки Argo CD
+│   │   ├── argo_cd.tf       # Helm release для Argo CD
+│   │   ├── variables.tf     # Змінні (версія чарта, namespace, repo URL тощо)
+│   │   ├── providers.tf     # Kubernetes+Helm providers
+│   │   ├── values.yaml      # Кастомна конфігурація Argo CD
+│   │   └── outputs.tf       # Виводи (hostname, initial admin password)
+│   │               └──charts/                  # Helm-чарт для створення app'ів
+│   │               ├── Chart.yaml
+│   │               ├── values.yaml          # Список applications, repositories
+│   │                       └── templates/
+│   │                   ├── application.yaml
+│   │                   └── repository.yaml
+│   ├── monitoring/          # ✅ Модуль для Helm-установки Prometheus & Grafana
+│       ├── main.tf          # Helm release для kube-prometheus-stack
+│       ├── variables.tf     # Змінні
+│       ├── values.yaml      # Конфігурація Grafana/Prometheus
+│       └── outputs.tf       # Виводи (Grafana URL, password)
+│
 ├── charts/
 │   └── django-app/
 │       ├── templates/
@@ -137,7 +145,8 @@ terraform apply --auto-approve
 2.  Створить репозиторій ECR.
 3.  Встановить Jenkins та налаштує Job'и (JCasC).
 4.  Встановить Argo CD та зареєструє Application `django-app`.
-5.  Розгорне базу даних RDS або Aurora.
+5.  Встановить Prometheus та Grafana для моніторингу.
+6.  Розгорне базу даних RDS або Aurora.
 
 ---
 
@@ -155,38 +164,54 @@ terraform apply --auto-approve
 
 ---
 
-### 4. Доступ до сервісів
+### 4. Перевірка доступності та Підключення
 
-#### Отримання доступу до кластера (kubeconfig):
-```bash
-aws eks update-kubeconfig --region us-west-2 --name eks-cluster-demo
-```
+Після успішного розгортання виконайте наступні команди для доступу до сервісів.
 
-#### Jenkins:
-```bash
-# Отримати URL
-kubectl get svc jenkins -n jenkins
+#### 🔹 Jenkins
+*   **URL:** `http://localhost:8080`
+*   **Команда доступу:**
+    ```bash
+    kubectl port-forward svc/jenkins 8080:8080 -n jenkins
+    ```
+*   **Логін:** `admin`
+*   **Пароль:** Виводиться в логах Jenkins при першому запуску або:
+    ```bash
+    kubectl get secret -n jenkins jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64 --decode
+    ```
 
-# Логін/Пароль (дефолтні з values.yaml)
-User: admin
-Pass: admin123
-```
+#### 🔹 Argo CD
+*   **URL:** `https://localhost:8081`
+*   **Команда доступу:**
+    ```bash
+    kubectl port-forward svc/argo-cd-argocd-server 8081:443 -n argocd
+    ```
+    *(Прийміть ризик безпеки в браузері, оскільки сертифікат самопідписаний)*
+*   **Логін:** `admin`
+*   **Пароль (отримати командою):**
+    ```bash
+    kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 --decode
+    ```
 
-##### Налаштування Jenkins:
-- Зайдіть у Jenkins (URL з виводу Terraform).
-- Запустіть seed-job, щоб створити пайплайн.
-- Схваліть скрипт у Manage Jenkins -> In-process Script Approval.
+#### 🔹 Моніторинг (Grafana)
+*   **URL:** `http://localhost:3000`
+*   **Команда доступу:**
+    ```bash
+    kubectl port-forward svc/prometheus-stack-grafana 3000:80 -n monitoring
+    ```
+*   **Логін:** `admin`
+*   **Пароль (отримати командою):**
+    ```bash
+    kubectl get secret -n monitoring prometheus-stack-grafana -o jsonpath='{.data.admin-password}' | base64 --decode
+    ```
 
+#### 🔹 Prometheus (UI)
+*   **URL:** `http://localhost:9090`
+*   **Команда доступу:**
+    ```bash
+    kubectl port-forward svc/prometheus-stack-kube-prom-prometheus 9090:9090 -n monitoring
+    ```
 
-#### Argo CD:
-```bash
-# Отримати URL (LoadBalancer)
-kubectl get svc argo-cd-argocd-server -n argocd
-
-# Отримати пароль admin (автоматично згенерований)
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
-User: admin
-```
 
 #### CI/CD процес:
 - Запустіть джобу django-docker.
@@ -199,6 +224,12 @@ User: admin
 - Argo CD: У дашборд Argo CD django-app у статусі Synced - зміни з Git автоматично розгорнуті в кластері.
 ![alt text](assets/argo_cd.png)
 ![alt text](assets/argo_cd_2.png)
+
+- Grafana (Monitoring):
+  ![alt text](assets/grafana_dashboard.png)  
+
+- Prometheus (UI):
+  ![alt text](assets/prometheus-target-health.png)  
 
 Додаток: Перевірте роботу Django за посиланням балансувальника: 
 ```bash
