@@ -19,6 +19,10 @@ spec:
       image: alpine/git
       command: ['sleep']
       args: ['99d']
+    - name: python
+      image: python:3.9-slim
+      command: ['sleep']
+      args: ['99d']
 """
     }
   }
@@ -29,17 +33,41 @@ spec:
   }
 
   stages {
-    stage('Debug: Find Dockerfile') {
-        steps {
-            container('git') {
-            sh """
-                echo "=== ПОШУК DOCKERFILE ==="
-                find ${WORKSPACE} -name Dockerfile
-                echo "=== ПОТОЧНА ДИРЕКТОРІЯ ==="
-                pwd
-            """
-            }
+    stage('Security: SAST (Bandit)') {
+      steps {
+        container('python') {
+          sh """
+            echo "Installing Bandit..."
+            pip install bandit
+            echo "Running Bandit Scan..."
+            # Скануємо код Django на вразливості
+            # -r: рекурсивно
+            # -f custom: формат виводу
+            # || true: щоб не зупиняти пайплайн при знаходженні помилок (можна прибрати для strict mode)
+            bandit -r django-docker-project/app || true
+          """
         }
+      }
+    }
+
+    stage('Security: Container Scan (Trivy)') {
+      steps {
+        container('git') {
+          sh """
+            echo "Installing Trivy..."
+            apk add --no-cache curl
+            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+
+            echo "Running Trivy Config Scan..."
+            # Скануємо конфігурацію (Dockerfile, Kubernetes manifest)
+            trivy config .
+            
+            echo "Running Trivy Filesystem Scan..."
+            # Скануємо файлову систему на наявність секретів та вразливостей у залежностях
+            trivy fs --scanners vuln,secret .
+          """
+        }
+      }
     }
 
     stage('Build & Push Docker Image') {
@@ -61,22 +89,16 @@ spec:
         container('git') {
           withCredentials([usernamePassword(credentialsId: 'github-token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PAT')]) {
             sh """
-                # 1. Дозволяємо Git працювати з цією директорією
                 git config --global --add safe.directory '*'
-
-                # 2. Налаштовуємо Git
                 git config user.email "jenkins@localhost"
                 git config user.name "jenkins"
                 
-                # 3. Оновлюємо тег у values.yaml (шлях ми підтвердили через Debug)
                 sed -i "s|repository: .*|repository: ${ECR_REPOSITORY_URL}|g" final-project/charts/django-app/values.yaml
                 sed -i "s/tag: .*/tag: ${IMAGE_TAG}/g" final-project/charts/django-app/values.yaml
 
-                # 4. Комітимо та пушимо зміни
                 git add final-project/charts/django-app/values.yaml
                 git commit -m "Update image tag to ${IMAGE_TAG} [skip ci]"
                 
-                # Пушимо в гілку final-project
                 git push https://${GIT_USERNAME}:${GIT_PAT}@github.com/Maksym-Zyza/devops-ci-cd.git HEAD:final-project
             """
           }
