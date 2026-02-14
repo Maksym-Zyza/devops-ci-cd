@@ -193,6 +193,13 @@ terraform apply --auto-approve
     kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 --decode
     ```
 
+#### 🔹 Prometheus (UI)
+*   **URL:** `http://localhost:9090`
+*   **Команда доступу:**
+    ```bash
+    kubectl port-forward svc/prometheus-stack-kube-prom-prometheus 9090:9090 -n monitoring
+    ```
+
 #### 🔹 Моніторинг (Grafana)
 *   **URL:** `http://localhost:3000`
 *   **Команда доступу:**
@@ -205,14 +212,6 @@ terraform apply --auto-approve
     kubectl get secret -n monitoring prometheus-stack-grafana -o jsonpath='{.data.admin-password}' | base64 --decode
     ```
 
-#### 🔹 Prometheus (UI)
-*   **URL:** `http://localhost:9090`
-*   **Команда доступу:**
-    ```bash
-    kubectl port-forward svc/prometheus-stack-kube-prom-prometheus 9090:9090 -n monitoring
-    ```
-
-
 #### CI/CD процес:
 - Запустіть джобу django-docker.
 - Jenkins збере образ через Kaniko, завантажить його в ECR та оновить тег у values.yaml
@@ -223,13 +222,13 @@ terraform apply --auto-approve
 
 - Argo CD: У дашборд Argo CD django-app у статусі Synced - зміни з Git автоматично розгорнуті в кластері.
 ![alt text](assets/argo_cd.png)
-![alt text](assets/argo_cd_2.png)
+
+- Prometheus (UI):
+  ![alt text](assets/prometheus-target-health.png)  
 
 - Grafana (Monitoring):
   ![alt text](assets/grafana_dashboard.png)  
 
-- Prometheus (UI):
-  ![alt text](assets/prometheus-target-health.png)  
 
 Додаток: Перевірте роботу Django за посиланням балансувальника: 
 ```bash
