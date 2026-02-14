@@ -1,0 +1,23 @@
+# Override values for kube-prometheus-stack
+
+# prometheus:
+#   prometheusSpec:
+    # Enable persistence if desired
+    # storageSpec:
+    #   volumeClaimTemplate:
+    #     spec:
+    #       storageClassName: ebs-sc
+    #       accessModes: ["ReadWriteOnce"]
+    #       resources:
+    #         requests:
+    #           storage: 50Gi
+
+    # Add custom scraping configs here
+    # additionalScrapeConfigs: []
+
+grafana:
+  # adminPassword: "prom-operator"
+  persistence:
+    enabled: false
+    # storageClassName: ebs-sc
+    # size: 10Gi

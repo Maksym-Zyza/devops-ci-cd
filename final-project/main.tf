@@ -166,3 +166,14 @@ module "rds" {
     Project     = "myapp"
   }
 }
+
+module "monitoring" {
+  source    = "./modules/monitoring"
+  namespace = "monitoring"
+
+  providers = {
+    helm       = helm
+    kubernetes = kubernetes
+    aws        = aws
+  }
+}

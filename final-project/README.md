@@ -1,186 +1,122 @@
-# Завдання: Універсальний модуль RDS
+# DevOps CI/CD Final Project
 
-## Опис завдання
+## Опис проєкту
 
-Реалізувати універсальний модуль `rds`, який:
+Цей проєкт реалізує повний цикл DevOps інфраструктури на AWS з використанням Terraform.
+Він включає розгортання мережі (VPC), Kubernetes кластера (EKS), баз даних (RDS/Aurora), а також налаштування CI/CD процесів (Jenkins, Argo CD) та моніторингу (Prometheus, Grafana).
 
-1.  Підіймає **Aurora Cluster** або звичайну **RDS instance** на основі значення змінної `use_aurora`.
-2.  Автоматично створює:
-    *   DB Subnet Group
-    *   Security Group
-    *   Parameter Group для обраного типу БД.
-3.  Працює з мінімальними змінами змінних і підтримує багаторазове використання.
+---
+
+## Архітектура та Компоненти
+
+*   **IaC:** Terraform
+*   **Cloud Provider:** AWS
+*   **Network:** VPC (Public/Private Subnets, NAT Gateway)
+*   **Container Orchestration:** Amazon EKS
+*   **Database:** Amazon RDS (PostgreSQL) або Amazon Aurora (конфігурується)
+*   **Container Registry:** Amazon ECR
+*   **CI/CD:** Jenkins + Argo CD
+*   **Monitoring:** Prometheus + Grafana (kube-prometheus-stack)
 
 ---
 
 ## Структура проєкту
 
 ```bash
-Project/
-│
-├── main.tf                  # Головний файл для підключення модулів
-├── backend.tf               # Налаштування бекенду для стейтів (S3 + DynamoDB)
-├── outputs.tf               # Загальні виводи ресурсів
-│
-├── modules/                 # Каталог з усіма модулями
-│   ├── s3-backend/          # Модуль для S3 та DynamoDB
-│   ├── vpc/                 # Модуль для VPC
-│   ├── ecr/                 # Модуль для ECR
-│   ├── eks/                 # Модуль для Kubernetes кластера
-│   │
-│   ├── rds/                 # ✅ Модуль для RDS (Universal)
-│   │   ├── rds.tf           # Створення RDS бази даних  
-│   │   ├── aurora.tf        # Створення aurora кластера бази даних  
-│   │   ├── shared.tf        # Спільні ресурси (SG, Subnet Group, PG)
-│   │   ├── variables.tf     # Змінні (ресурси, креденшели, values)
-│   │   └── outputs.tf       # Виводи (ендпоінти)
-│   │ 
-│   ├── jenkins/             # Модуль для Helm-установки Jenkins
-│   └── argo_cd/             # Модуль для Helm-установки Argo CD
-│
-├── charts/                  # Helm-чарти
-│   └── django-app/
+final-project/
+├── main.tf                  # Головний файл (підключення модулів)
+├── variables.tf             # Вхідні змінні
+├── outputs.tf               # Виводи (endpoints, credentials)
+├── modules/                 # Локальні Terraform модулі
+│   ├── vpc/                 # Мережа
+│   ├── eks/                 # Кластер Kubernetes
+│   ├── rds/                 # База даних
+│   ├── ecr/                 # Реєстр контейнерів
+│   ├── jenkins/             # Jenkins (Helm)
+│   ├── argo_cd/             # Argo CD (Helm)
+│   └── monitoring/          # Prometheus & Grafana (Helm)
+└── README.md                # Документація
 ```
 
 ---
 
-## Функціонал модуля
+## 🚀 Quick Start (Інструкція з запуску)
 
-*   `use_aurora = true` → створюється **Aurora Cluster** + writer (+ readers за налаштуванням).
-*   `use_aurora = false` → створюється одна **aws_db_instance**.
+### 1. Підготовка (Prerequisites)
+Переконайтеся, що у вас встановлені:
+*   Terraform
+*   AWS CLI (налаштований профіль)
+*   Kubectl
+*   Helm
 
-**В обох випадках автоматично створюється:**
-*   `aws_db_subnet_group`
-*   `aws_security_group`
-*   `parameter group` з базовими параметрами (`max_connections`, `log_statement`, `work_mem`).
+### 2. Розгортання інфраструктури
 
-Параметри `engine`, `engine_version`, `instance_class`, `multi_az` задаються через змінні.
+Ініціалізація та застосування Terraform конфігурації:
+
+```bash
+cd final-project
+terraform init
+terraform apply
+```
+
+### 3. Перевірка доступності та Підключення
+
+Після успішного розгортання виконайте наступні команди для доступу до сервісів.
+
+#### 🔹 Jenkins
+*   **URL:** `http://localhost:8080`
+*   **Команда доступу:**
+    ```bash
+    kubectl port-forward svc/jenkins 8080:8080 -n jenkins
+    ```
+*   **Логін:** `admin`
+*   **Пароль:** Виводиться в логах Jenkins при першому запуску або:
+    ```bash
+    kubectl get secret -n jenkins jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64 --decode
+    ```
+
+#### 🔹 Argo CD
+*   **URL:** `https://localhost:8081`
+*   **Команда доступу:**
+    ```bash
+    kubectl port-forward svc/argo-cd-argocd-server 8081:443 -n argocd
+    ```
+    *(Прийміть ризик безпеки в браузері, оскільки сертифікат самопідписаний)*
+*   **Логін:** `admin`
+*   **Пароль (отримати командою):**
+    ```bash
+    kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 --decode
+    ```
+
+#### 🔹 Моніторинг (Grafana)
+*   **URL:** `http://localhost:3000`
+*   **Команда доступу:**
+    ```bash
+    kubectl port-forward svc/prometheus-stack-grafana 3000:80 -n monitoring
+    ```
+*   **Логін:** `admin`
+*   **Пароль (отримати командою):**
+    ```bash
+    kubectl get secret -n monitoring prometheus-stack-grafana -o jsonpath='{.data.admin-password}' | base64 --decode
+    ```
+
+#### 🔹 Prometheus (UI)
+*   **URL:** `http://localhost:9090`
+*   **Команда доступу:**
+    ```bash
+    kubectl port-forward svc/prometheus-stack-kube-prom-prometheus 9090:9090 -n monitoring
+    ```
 
 ---
 
-## Критерії оцінювання (100 балів)
+## 🧹 Clean Up (Видалення ресурсів)
 
-| Компонент | Бал |
-|---|---|
-| Універсальний модуль rds | 30 |
-| Підтримка Aurora + звичайної RDS через use_aurora | 25 |
-| DB Subnet Group + Security Group + Parameter Group | 20 |
-| Змінні з типами, описами та дефолтами | 15 |
-| README.md з інструкцією та прикладом використання | 10 |
+⚠️ **УВАГА!** Щоб уникнути зайвих витрат, після завершення роботи обов'язково видаліть створені ресурси.
 
----
+1.  Видаліть інфраструктуру:
+    ```bash
+    terraform destroy
+    ```
+    *(Підтвердіть дію, ввівши `yes`)*
 
-## Інструкція та Приклади використання
-
-### Приклад 1: Звичайна RDS (PostgreSQL)
-
-```hcl
-module "rds" {
-  source = "./modules/rds"
-
-  name                = "myapp-db"
-  use_aurora          = false
-  
-  engine              = "postgres"
-  engine_version      = "14.20"
-  instance_class      = "db.t3.micro"
-  allocated_storage   = 20
-  
-  db_name             = "myapp"
-  username            = "postgres"
-  password            = "securepassword123"
-  
-  vpc_id              = module.vpc.vpc_id
-  subnet_private_ids  = module.vpc.private_subnets
-  subnet_public_ids   = module.vpc.public_subnets
-  publicly_accessible = true
-  
-  parameters = {
-    max_connections = "100"
-    log_statement   = "ddl"
-  }
-}
-```
-
-### Приклад 2: Aurora Cluster (PostgreSQL)
-
-Щоб змінити тип БД на Aurora, встановіть `use_aurora = true` та вкажіть відповідні параметри кластера.
-
-```hcl
-module "rds" {
-  source = "./modules/rds"
-
-  name                  = "myapp-aurora"
-  use_aurora            = true
-  aurora_replica_count  = 1
-  
-  engine_cluster        = "aurora-postgresql"
-  engine_version_cluster = "15.15"
-  instance_class        = "db.t3.medium"
-  
-  db_name             = "myapp"
-  username            = "postgres"
-  password            = "securepassword123"
-  
-  vpc_id              = module.vpc.vpc_id
-  subnet_private_ids  = module.vpc.private_subnets
-  subnet_public_ids   = module.vpc.public_subnets
-  
-  parameters = {
-    log_statement = "all"
-    work_mem      = "16384" # 16MB in KB
-  }
-}
-```
-
-### Опис змінних (Variables)
-
-| Назва | Тип | Опис | Дефолт |
-|---|---|---|---|
-| `name` | string | Назва інстансу або кластера | - |
-| `use_aurora` | bool | Визначає тип розгортання: `true` (Aurora), `false` (RDS) | `false` |
-| `engine` | string | Рушій бази даних для Standard RDS | `postgres` |
-| `engine_version` | string | Версія рушія для Standard RDS | `14.20` |
-| `engine_cluster` | string | Рушій бази даних для Aurora Cluster | `aurora-postgresql` |
-| `engine_version_cluster` | string | Версія рушія для Aurora Cluster | `15.15` |
-| `instance_class` | string | Клас інстансу (напр. `db.t3.micro`) | `db.t3.micro` |
-| `allocated_storage` | number | Розмір сховища в ГБ (тільки для RDS) | `20` |
-| `db_name` | string | Назва бази даних | - |
-| `username` | string | Ім'я головного користувача | - |
-| `password` | string | Пароль головного користувача | - |
-| `vpc_id` | string | ID VPC | - |
-| `subnet_private_ids` | list | Список ID приватних підмереж | - |
-| `subnet_public_ids` | list | Список ID публічних підмереж | - |
-| `publicly_accessible` | bool | Чи доступна БД з інтернету | `false` |
-| `parameters` | map | Кастомні параметри БД (max_connections, work_mem тощо) | `{}` |
-| `aurora_replica_count` | number | Кількість реплік читання для Aurora | `1` |
-| `port` | number | Порт бази даних | `5432` |
-| `allowed_cidr_blocks` | list | Список дозволених IP/CIDR для доступу | `[]` |
-| `allowed_security_groups` | list | Список дозволених Security Group ID | `[]` |
-
-### Як змінити конфігурацію
-
-1.  **Тип БД (Aurora vs RDS):** Змініть змінну `use_aurora` (`true` або `false`).
-2.  **Engine:** Використовуйте `engine` для RDS або `engine_cluster` для Aurora.
-3.  **Версія:** `engine_version` для RDS або `engine_version_cluster` для Aurora.
-4.  **Клас інстансу:** Змініть `instance_class`. Aurora може вимагати потужніших типів інстансів (наприклад, `db.t3.medium`), ніж звичайна RDS.
-5.  
-
-
-- DB Subnet Group:
-![alt text](assets/db-subnet-group.png)
-
-- DB Subnet Group:
-![alt text](assets/db_subnet_group.png)
-
-- Parameter Group:
-![alt text](assets/db_parameter_group.png)
-
-- Звичайна RDS:
-![alt text](assets/db_postgresql.png)
-
-- Aurora Cluster:
-![alt text](assets/db_aurora.png)
-
-- DB Connection:
-- ![alt text](assets/db_connection.png)
+2.  Перевірте консоль AWS, щоб переконатися, що всі Load Balancer та EBS томи були видалені.
