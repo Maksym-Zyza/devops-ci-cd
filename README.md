@@ -234,7 +234,13 @@ User: admin
 
 - Argo CD: У дашборд Argo CD django-app у статусі Synced - зміни з Git автоматично розгорнуті в кластері.
 ![alt text](assets/argo_cd.png)
-![alt text](assets/argo_cd_2.png)
+
+- Prometheus (UI):
+  ![alt text](assets/prometheus-target-health.png)  
+
+- Grafana (Monitoring):
+  ![alt text](assets/grafana_dashboard.png)  
+
 
 Додаток: Перевірте роботу Django за посиланням балансувальника: 
 ```bash
