@@ -1,8 +1,8 @@
-# DevOps CI/CD: Jenkins, Argo CD, EKS, Terraform
+# DevOps CI/CD: Jenkins, Argo CD, EKS, Terraform, Monitoring
 
-Цей проект реалізує повний цикл **CI/CD** (Continuous Integration / Continuous Delivery) та **GitOps** підходів для розгортання Django-застосунку в Kubernetes (EKS). 
+Цей проект реалізує повний цикл **CI/CD** (Continuous Integration / Continuous Delivery), **GitOps** підходів та **Моніторингу** для розгортання Django-застосунку в Kubernetes (EKS). 
 
-Інфраструктура керується через **Terraform**, збірка та доставка артефактів — через **Jenkins**, а синхронізація стану кластера — через **Argo CD**.
+Інфраструктура керується через **Terraform**, збірка та доставка артефактів — через **Jenkins**, синхронізація стану кластера — через **Argo CD**, а спостережуваність забезпечується стеком **Prometheus & Grafana**.
 
 ---
 
@@ -27,6 +27,7 @@
 *   **CI Server:** Jenkins (Running on K8s, using Kubernetes Agent & Kaniko for Docker builds).
 *   **CD / GitOps:** Argo CD (App of Apps pattern).
 *   **Monitoring:** Prometheus & Grafana (kube-prometheus-stack).
+*   **Security:** Trivy, Bandit (DevSecOps).
 *   **Package Manager:** Helm.
 *   **Application:** Python Django.
 
@@ -150,6 +151,22 @@ terraform apply --auto-approve
 
 ---
 
+## 🔒 DevSecOps та Безпека
+
+У проекті реалізовано автоматизовані перевірки безпеки в CI/CD пайплайні (Jenkins):
+
+1.  **SAST (Static Application Security Testing):**
+    *   Використовується інструмент **Bandit**.
+    *   Аналізує Python-код на наявність вразливостей (hardcoded secrets, SQL injection, unsafe functions) ще до збірки образу.
+2.  **Container & Config Security:**
+    *   Використовується сканер **Trivy**.
+    *   Перевіряє файлову систему, Dockerfile та Kubernetes маніфести на наявність відомих вразливостей (CVE) та помилок конфігурації.
+3.  **Network Security:**
+    *   Бази даних (RDS) розміщені в приватних підмережах без прямого доступу з інтернету.
+    *   Використовуються Security Groups для обмеження трафіку.
+
+---
+
 ## 💾 Універсальний модуль RDS
 
 Проєкт включає універсальний модуль для роботи з базами даних AWS, який підтримує два режими роботи через одну змінну-перемикач `use_aurora`:
@@ -164,53 +181,48 @@ terraform apply --auto-approve
 
 ---
 
-### 4. Перевірка доступності та Підключення
+### 4. Доступ до сервісів
 
-Після успішного розгортання виконайте наступні команди для доступу до сервісів.
+#### Отримання доступу до кластера (kubeconfig):
+```bash
+aws eks update-kubeconfig --region us-west-2 --name eks-cluster-demo
+```
 
-#### 🔹 Jenkins
-*   **URL:** `http://localhost:8080`
-*   **Команда доступу:**
-    ```bash
-    kubectl port-forward svc/jenkins 8080:8080 -n jenkins
-    ```
-*   **Логін:** `admin`
-*   **Пароль:** Виводиться в логах Jenkins при першому запуску або:
-    ```bash
-    kubectl get secret -n jenkins jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64 --decode
-    ```
+#### Jenkins:
+```bash
+# Отримати URL
+kubectl port-forward svc/jenkins 8080:8080 -n jenkins
 
-#### 🔹 Argo CD
-*   **URL:** `https://localhost:8081`
-*   **Команда доступу:**
-    ```bash
-    kubectl port-forward svc/argo-cd-argocd-server 8081:443 -n argocd
-    ```
-    *(Прийміть ризик безпеки в браузері, оскільки сертифікат самопідписаний)*
-*   **Логін:** `admin`
-*   **Пароль (отримати командою):**
-    ```bash
-    kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 --decode
-    ```
+# Логін/Пароль (дефолтні з values.yaml)
+User: admin
+Pass: admin123
+```
 
-#### 🔹 Prometheus (UI)
-*   **URL:** `http://localhost:9090`
-*   **Команда доступу:**
-    ```bash
-    kubectl port-forward svc/prometheus-stack-kube-prom-prometheus 9090:9090 -n monitoring
-    ```
+##### Налаштування Jenkins:
+- Зайдіть у Jenkins (URL з виводу Terraform).
+- Запустіть seed-job, щоб створити пайплайн.
+- Схваліть скрипт у Manage Jenkins -> In-process Script Approval.
 
-#### 🔹 Моніторинг (Grafana)
-*   **URL:** `http://localhost:3000`
-*   **Команда доступу:**
-    ```bash
-    kubectl port-forward svc/prometheus-stack-grafana 3000:80 -n monitoring
-    ```
-*   **Логін:** `admin`
-*   **Пароль (отримати командою):**
-    ```bash
-    kubectl get secret -n monitoring prometheus-stack-grafana -o jsonpath='{.data.admin-password}' | base64 --decode
-    ```
+
+#### Argo CD:
+```bash
+# Отримати URL (LoadBalancer)
+kubectl port-forward svc/argo-cd-argocd-server 8081:443 -n argocd
+
+# Отримати пароль admin (автоматично згенерований)
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
+User: admin
+```
+
+#### Grafana (Monitoring):
+```bash
+# Отримати URL
+kubectl port-forward svc/prometheus-stack-grafana 3000:80 -n monitoring
+
+# Отримати пароль admin
+kubectl get secret -n monitoring prometheus-stack-grafana -o jsonpath='{.data.admin-password}' | base64 --decode; echo
+User: admin
+```
 
 #### CI/CD процес:
 - Запустіть джобу django-docker.
@@ -222,13 +234,7 @@ terraform apply --auto-approve
 
 - Argo CD: У дашборд Argo CD django-app у статусі Synced - зміни з Git автоматично розгорнуті в кластері.
 ![alt text](assets/argo_cd.png)
-
-- Prometheus (UI):
-  ![alt text](assets/prometheus-target-health.png)  
-
-- Grafana (Monitoring):
-  ![alt text](assets/grafana_dashboard.png)  
-
+![alt text](assets/argo_cd_2.png)
 
 Додаток: Перевірте роботу Django за посиланням балансувальника: 
 ```bash
@@ -241,11 +247,12 @@ kubectl get svc django-app -n default
 
 1.  **Code Change:** Розробник робить зміни в коді та пушить в GitHub.
 2.  **Jenkins Trigger:** `seed-job` (або webhook) запускає пайплайн `django-docker`.
-3.  **Build:** Jenkins (Kaniko) збирає Docker-образ.
-4.  **Push:** Образ пушиться в AWS ECR з тегом `v1.0.${BUILD_NUMBER}`.
-5.  **Git Update:** Jenkins клонує репозиторій з Helm-чартом, оновлює `tag` у файлі `charts/django-app/values.yaml` і робить `git push`.
-6.  **Argo Sync:** Argo CD (який моніторить Git-репозиторій) бачить зміни в `values.yaml`.
-7.  **Deployment:** Argo CD застосовує зміни до кластера (оновлює Deployment, щоб використати новий образ).
+3.  **Security Scan:** Jenkins запускає Bandit (SAST) та Trivy (Container Security).
+4.  **Build:** Jenkins (Kaniko) збирає Docker-образ.
+5.  **Push:** Образ пушиться в AWS ECR з тегом `v1.0.${BUILD_NUMBER}`.
+6.  **Git Update:** Jenkins клонує репозиторій з Helm-чартом, оновлює `tag` у файлі `charts/django-app/values.yaml` і робить `git push`.
+7.  **Argo Sync:** Argo CD (який моніторить Git-репозиторій) бачить зміни в `values.yaml`.
+8.  **Deployment:** Argo CD застосовує зміни до кластера (оновлює Deployment, щоб використати новий образ).
 
 ---
 
