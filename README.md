@@ -108,10 +108,10 @@ Project/
 *   GitHub Personal Access Token (PAT) з правами `repo`.
 
 ### 2. Налаштування змінних середовища
-Для роботи інфраструктури необхідно створити файл `terraform.tfvars` у директорії `lesson-db-module/`. Ви можете скопіювати його з прикладу:
+Для роботи інфраструктури необхідно створити файл `terraform.tfvars` у директорії `final-project/`. Ви можете скопіювати його з прикладу:
 
 ```bash
-cp lesson-db-module/terraform.tfvars.example lesson-db-module/terraform.tfvars
+cp final-project/terraform.tfvars.example final-project/terraform.tfvars
 ```
 
 У файлі `terraform.tfvars` необхідно заповнити наступні змінні:
@@ -126,7 +126,7 @@ cp lesson-db-module/terraform.tfvars.example lesson-db-module/terraform.tfvars
 Ініціалізуйте та застосуйте конфігурацію:
 
 ```bash
-cd lesson-db-module
+cd final-project
 terraform init
 terraform apply --auto-approve
 ```
