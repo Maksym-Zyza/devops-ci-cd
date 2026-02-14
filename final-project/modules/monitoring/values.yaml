@@ -1,8 +1,8 @@
 # Override values for kube-prometheus-stack
 
-# prometheus:
-#   prometheusSpec:
-    # Enable persistence if desired
+prometheus:
+  prometheusSpec:
+    # Сюди можна додати конфігурацію persistence (EBS), якщо потрібно зберігати метрики після перезапуску
     # storageSpec:
     #   volumeClaimTemplate:
     #     spec:
@@ -10,14 +10,12 @@
     #       accessModes: ["ReadWriteOnce"]
     #       resources:
     #         requests:
-    #           storage: 50Gi
-
-    # Add custom scraping configs here
-    # additionalScrapeConfigs: []
+    #           storage: 10Gi
+    
+    # Додаткові налаштування збору метрик
+    additionalScrapeConfigs: []
 
 grafana:
-  # adminPassword: "prom-operator"
+  # Налаштування Grafana
   persistence:
-    enabled: false
-    # storageClassName: ebs-sc
-    # size: 10Gi
+    enabled: false # Встановіть true та вкажіть storageClassName для збереження дашбордів
