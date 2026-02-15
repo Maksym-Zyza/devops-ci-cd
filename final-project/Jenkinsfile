@@ -23,6 +23,29 @@ spec:
       image: python:3.9-slim
       command: ['sleep']
       args: ['99d']
+      env:
+        - name: DATABASE_HOST
+          value: "localhost"
+        - name: DATABASE_PORT
+          value: "5432"
+        - name: DATABASE_NAME
+          value: "test_db"
+        - name: DATABASE_USER
+          value: "postgres"
+        - name: DATABASE_PASSWORD
+          value: "postgres"
+    - name: postgres
+      image: postgres:13-alpine
+      env:
+        - name: POSTGRES_DB
+          value: "test_db"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          value: "postgres"
+      ports:
+        - containerPort: 5432
+          name: postgres
 """
     }
   }
@@ -38,7 +61,17 @@ spec:
         container('python') {
           sh """
             echo "Installing dependencies for testing..."
+            # Встановлюємо netcat для перевірки доступності порту (опціонально, але корисно)
+            apt-get update && apt-get install -y netcat-openbsd gcc libpq-dev
+
             pip install -r django-docker-project/requirements.txt
+            
+            echo "Waiting for PostgreSQL to be ready..."
+            while ! nc -z localhost 5432; do   
+              sleep 1
+            done
+            echo "PostgreSQL started"
+
             echo "Running Django Tests..."
             cd django-docker-project/app && python manage.py test
           """
@@ -53,10 +86,6 @@ spec:
             echo "Installing Bandit..."
             pip install bandit
             echo "Running Bandit Scan..."
-            # Скануємо код Django на вразливості
-            # -r: рекурсивно
-            # -f custom: формат виводу
-            # || true: щоб не зупиняти пайплайн при знаходженні помилок (можна прибрати для strict mode)
             bandit -r django-docker-project/app || true
           """
         }
@@ -72,11 +101,9 @@ spec:
             curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
 
             echo "Running Trivy Config Scan..."
-            # Скануємо конфігурацію (Dockerfile, Kubernetes manifest)
             trivy config .
             
             echo "Running Trivy Filesystem Scan..."
-            # Скануємо файлову систему на наявність секретів та вразливостей у залежностях
             trivy fs --scanners vuln,secret .
           """
         }
