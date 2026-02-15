@@ -61,7 +61,7 @@ spec:
         container('python') {
           sh """
             echo "Installing dependencies for testing..."
-            # Встановлюємо netcat для перевірки доступності порту (опціонально, але корисно)
+            # Встановлюємо netcat та бібліотеки для psycopg2
             apt-get update && apt-get install -y netcat-openbsd gcc libpq-dev
 
             pip install -r django-docker-project/requirements.txt
