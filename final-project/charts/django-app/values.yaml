@@ -2,7 +2,7 @@ replicaCount: 2
 
 image:
   repository: 088581047201.dkr.ecr.us-west-2.amazonaws.com/django-app
-  tag: v2
+  tag: v3
   pullPolicy: IfNotPresent
 
 service:
