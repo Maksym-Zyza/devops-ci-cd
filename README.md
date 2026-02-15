@@ -244,7 +244,11 @@ User: admin
 
 Додаток: Перевірте роботу Django за посиланням балансувальника: 
 ```bash
+# Отримати URL балансувальника
 kubectl get svc django-app -n default
+
+# Перевірити Health Check (додайте /health/ до EXTERNAL-IP)
+# Приклад: http://<EXTERNAL-IP>/health/
 ```
 
 ---
