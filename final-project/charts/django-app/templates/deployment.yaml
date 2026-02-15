@@ -25,15 +25,15 @@ spec:
                 name: {{ .Release.Name }}-secret
           livenessProbe:
             httpGet:
-              path: /
+              path: /health/
               port: 8000
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /
+              path: /health/
               port: 8000
-            initialDelaySeconds: 5
+            initialDelaySeconds: 30
             periodSeconds: 5
           resources:
 {{ toYaml .Values.resources | indent 12 }}
