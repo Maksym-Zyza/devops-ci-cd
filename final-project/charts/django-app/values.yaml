@@ -16,7 +16,7 @@ config:
 
 # Параметри БД перенесено в secrets.yaml
 database:
-  host: "myapp-db.us-west-2.rds.amazonaws.com"
+  host: "myapp-db.cdw06aqem2kb.us-west-2.rds.amazonaws.com"
   port: "5432"
   name: "myapp"
   user: "postgres"
