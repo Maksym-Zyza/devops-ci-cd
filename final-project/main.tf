@@ -146,13 +146,13 @@ module "rds" {
   vpc_id                  = module.vpc.vpc_id
   subnet_private_ids      = module.vpc.private_subnets
   subnet_public_ids       = module.vpc.public_subnets
-  publicly_accessible     = true
+  publicly_accessible     = false
   multi_az                = true
   backup_retention_period = 7
 
   # Security
   port                = var.db_port
-  allowed_cidr_blocks = ["0.0.0.0/0"] # Увага: Для production змініть на конкретні IP
+  allowed_cidr_blocks = [module.vpc.vpc_cidr_block] # Доступ тільки зсередини VPC
 
   # Параметри для Parameter Group (працюють для обох типів)
   parameters = {

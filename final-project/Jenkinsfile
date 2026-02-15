@@ -33,6 +33,19 @@ spec:
   }
 
   stages {
+    stage('Unit Tests') {
+      steps {
+        container('python') {
+          sh """
+            echo "Installing dependencies for testing..."
+            pip install -r django-docker-project/requirements.txt
+            echo "Running Django Tests..."
+            cd django-docker-project/app && python manage.py test
+          """
+        }
+      }
+    }
+
     stage('Security: SAST (Bandit)') {
       steps {
         container('python') {

@@ -11,13 +11,16 @@ service:
   targetPort: 8000
 
 config:
-  DEBUG: "0"
+  DEBUG: "False" # Вимкнено для безпеки
   ALLOWED_HOSTS: "*"
-  DATABASE_HOST: "postgres.example.internal"
-  DATABASE_PORT: "5432"
-  DATABASE_NAME: "django_db"
-  DATABASE_USER: "django_user"
-  DATABASE_PASSWORD: "django_password"
+
+# Параметри БД перенесено в secrets.yaml
+database:
+  host: "myapp-db.us-west-2.rds.amazonaws.com"
+  port: "5432"
+  name: "myapp"
+  user: "postgres"
+  # password: "..." # Пароль передається окремо через --set або secrets
 
 resources:
   requests:
@@ -32,4 +35,3 @@ autoscaling:
   minReplicas: 2
   maxReplicas: 6
   targetCPUUtilizationPercentage: 70
-
