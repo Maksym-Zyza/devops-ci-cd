@@ -1,5 +1,7 @@
 # DevOps CI/CD: Jenkins, Argo CD, EKS, Terraform, Monitoring
 
+![alt text](assets/cicd_project.jpg)
+
 Цей навчальний проект реалізує повний цикл **CI/CD** (Continuous Integration / Continuous Delivery), **GitOps** підходів та **Моніторингу** для розгортання Django-застосунку в Kubernetes (AWS EKS).
 
 Інфраструктура керується через **Terraform**, збірка та доставка артефактів — через **Jenkins**, синхронізація стану кластера — через **Argo CD**, а спостережуваність забезпечується стеком **Prometheus & Grafana**.
@@ -55,3 +57,10 @@
 * **Kubernetes** — платформа для керування контейнерами.
 * **Aurora DB** — хмарна база даних AWS з високою доступністю.
 * **DevSecOps** — інтеграція безпеки на кожному етапі розробки.
+
+
+## Architecture Diagram
+![alt text](assets/architecture_diagram.jpg)
+
+## CI/CD Workflow
+![alt text](assets/cicd_flow_diagram.jpg)
